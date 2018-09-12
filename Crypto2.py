@@ -10,6 +10,7 @@ NORMAL_WORD = list(map(lambda x: x.upper(), word_sheet.col_values(0)))
 
 print(NORMAL_WORD)
 
+
 def encrypt(dcrypted_str: str, key_matrix: np.matrix):
     if dcrypted_str.__len__() % 2:
         dcrypted_str = dcrypted_str + dcrypted_str[-1]
@@ -31,28 +32,39 @@ def decrypt(ecrypted_str: str, key_matrix: np.matrix) -> str:
 
 def crack(ecrypted_str: str, max_hope: int):
     result = []
-    for a in range(-max_hope, max_hope):
-        for b in range(-max_hope, max_hope):
-            for c in range(-max_hope, max_hope):
-                for d in range(-max_hope, max_hope):
+    for a in range(0, max_hope):
+        for b in range(0, max_hope):
+            for c in range(0, max_hope):
+                for d in range(0, max_hope):
                     if not abs(a * d - b * c) < 1e-5:
                         key = np.matrix([[a, b], [c, d]])
                         res = decrypt(ecrypted_str, key)
                         if res is not None:
-                            if sum(map(lambda w: res.count(w), NORMAL_WORD)) > 10:
-                                result.append((key, res.lower()))
-
+                            result.append([
+                                sum(map(lambda x: res.count(x), NORMAL_WORD)),
+                                key,
+                                res])
+    result.sort(key=lambda x: x[0], reverse=True)
     return result
 
-def judge(string: str) -> bool:
+
+def judge(string: str) -> int:
     current = 0
-    pos = min(map(lambda x: string.find(x), NORMAL_WORD))
-    if pos > 6:
-        return current
-    split_str = string[:]
+    while len(string) > 10:
+        for w in NORMAL_WORD:
+            tmp = string.find(w)
+            if tmp == 0:
+                string = string[len(w):]
+                break
+            elif not tmp == -1:
+                return current
+        current = current + 1
+    return current
+
 
 if __name__ == '__main__':
-
     TEST_STR: str = "AOBZKNJUYSWCUQCDHSSYHISHVGABZPLIZFSVDMXMABKYNZTCOPYWNWEEQFSHMQBWKWMQPEOGUQUYMSWPPGKUDIOIKGSEQAUMMQFLKLTNXYIFQVCCYZXUEZCDMDDASEKNRWQYSEZYLXXKKXKLLSPEIGEXQAKBAHEJSRNUAOCAWBLWFAEWFAGOFHUTOPQAWCGUKNVGMQBWKWAOVIGJHQKXTMJHIGQYLXYHRUSEOQJHSRCMBIABUMXLLWN"
-    TEST_STR = TEST_STR[:60]
-    print(crack(TEST_STR, 20))
+    TEST_STR = TEST_STR[:20]
+
+    res = crack(TEST_STR, 26)
+    print(res, res.__len__())
