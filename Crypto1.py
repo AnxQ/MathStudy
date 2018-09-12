@@ -38,8 +38,8 @@ def decrypt(ecrpted_str: str, key: List[int]):
 
 
 def encrypt(dcrpted_str: str, key: List[int]):
-
-    pass
+    return ''.join(list(map(lambda c: alphabet[key[0] * (alphabet.index(c) + key[1]) % 26] if c in alphabet else c,
+                            dcrpted_str)))
 
 
 def crack(ecrpted_str: str):

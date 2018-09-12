@@ -1,25 +1,50 @@
 import numpy as np
+import xlrd
 
 ALPHABET_DICT: dict = dict(zip([chr(i) for i in range(65, 91)], [i % 26 for i in range(1, 27)]))
 NUMERIC_DICT: dict = dict(zip(ALPHABET_DICT.values(), ALPHABET_DICT.keys()))
 
+workbook = xlrd.open_workbook(r'./essential_words_cn.xls')
+word_sheet = workbook.sheet_by_index(1)
+NORMAL_WORD = list(map(lambda x: x.upper(), word_sheet.col_values(0)))
 
-def encrypt(dcrypted_str: str, key_matrix: np.matrix) -> str:
-    ori_m = np.matrix(list(map(lambda x: ALPHABET_DICT[x], dcrypted_str))).reshape(-1, 3)
+def encrypt(dcrypted_str: str, key_matrix: np.matrix):
+    if dcrypted_str.__len__() % 2:
+        dcrypted_str = dcrypted_str + ''.join([dcrypted_str[-1] for i in range(2 - dcrypted_str.__len__() % 2)])
+    ori_m = np.matrix(list(map(lambda x: ALPHABET_DICT[x], dcrypted_str))).reshape(-1, 2)
     enc_m = np.dot(ori_m, key_matrix).reshape(1, -1)
     return ''.join(map(lambda x: NUMERIC_DICT[x % 26], enc_m.tolist()[0]))
 
 
 def decrypt(ecrypted_str: str, key_matrix: np.matrix) -> str:
-    ori_m = np.matrix(list(map(lambda x: ALPHABET_DICT[x], ecrypted_str))).reshape(-1, 3)
+    if ecrypted_str.__len__() % 2:
+        ecrypted_str = ecrypted_str + ecrypted_str[-1]
+    ori_m = np.matrix(list(map(lambda x: ALPHABET_DICT[x], ecrypted_str))).reshape(-1, 2)
     dec_m = np.dot(ori_m, key_matrix.I).reshape(1, -1)
-    return ''.join(map(lambda x: NUMERIC_DICT[x % 26], dec_m.tolist()[0]))
+    try:
+        return ''.join(map(lambda x: NUMERIC_DICT[round(x % 26) if abs(x - round(x)) < 1e-5 else x], dec_m.tolist()[0]))
+    except KeyError:
+        return None
+
+
+def crack(ecrypted_str: str, max_hope: int):
+    result = []
+    for a in range(-max_hope, max_hope):
+        for b in range(-max_hope, max_hope):
+            for c in range(-max_hope, max_hope):
+                for d in range(-max_hope, max_hope):
+                    if not abs(a * d - b * c) < 1e-5:
+                        key = np.matrix([[a, b], [c, d]])
+                        res = decrypt(ecrypted_str, key)
+                        if res is not None:
+                            if sum(map(lambda w: w in res, NORMAL_WORD)) > 10:
+                                result.append((key, res.lower()))
+
+    return result
 
 
 if __name__ == '__main__':
-    TEST_STR: str = "THISISGABENEWELLTHANKSFORPLAYINGDOTATWOHAVEFUNANDENJOY"
-    TEST_KEY: np.matrix = np.matrix([[1, 0, 0], [1, 1, 2], [0, 1, 1]])
-    print(TEST_KEY.I)
-    ENCODED_STR = encrypt(TEST_STR, TEST_KEY)
-    print(ENCODED_STR)
-    print(decrypt(ENCODED_STR, TEST_KEY))
+
+    TEST_STR: str = "EXPROIEMRECAAAWMFYEQASXWAJFIDLCACGDSYPKPOIZKUTSLPGMEZSCARMOYOIONAJYSYQRUDSUTXADLCAAABIZVWMFY"
+
+    print(crack(TEST_STR, 10))
