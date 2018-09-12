@@ -8,9 +8,11 @@ workbook = xlrd.open_workbook(r'./essential_words_cn.xls')
 word_sheet = workbook.sheet_by_index(1)
 NORMAL_WORD = list(map(lambda x: x.upper(), word_sheet.col_values(0)))
 
+print(NORMAL_WORD)
+
 def encrypt(dcrypted_str: str, key_matrix: np.matrix):
     if dcrypted_str.__len__() % 2:
-        dcrypted_str = dcrypted_str + ''.join([dcrypted_str[-1] for i in range(2 - dcrypted_str.__len__() % 2)])
+        dcrypted_str = dcrypted_str + dcrypted_str[-1]
     ori_m = np.matrix(list(map(lambda x: ALPHABET_DICT[x], dcrypted_str))).reshape(-1, 2)
     enc_m = np.dot(ori_m, key_matrix).reshape(1, -1)
     return ''.join(map(lambda x: NUMERIC_DICT[x % 26], enc_m.tolist()[0]))
@@ -37,14 +39,20 @@ def crack(ecrypted_str: str, max_hope: int):
                         key = np.matrix([[a, b], [c, d]])
                         res = decrypt(ecrypted_str, key)
                         if res is not None:
-                            if sum(map(lambda w: w in res, NORMAL_WORD)) > 10:
+                            if sum(map(lambda w: res.count(w), NORMAL_WORD)) > 10:
                                 result.append((key, res.lower()))
 
     return result
 
+def judge(string: str) -> bool:
+    current = 0
+    pos = min(map(lambda x: string.find(x), NORMAL_WORD))
+    if pos > 6:
+        return current
+    split_str = string[:]
 
 if __name__ == '__main__':
 
-    TEST_STR: str = "EXPROIEMRECAAAWMFYEQASXWAJFIDLCACGDSYPKPOIZKUTSLPGMEZSCARMOYOIONAJYSYQRUDSUTXADLCAAABIZVWMFY"
-
-    print(crack(TEST_STR, 10))
+    TEST_STR: str = "AOBZKNJUYSWCUQCDHSSYHISHVGABZPLIZFSVDMXMABKYNZTCOPYWNWEEQFSHMQBWKWMQPEOGUQUYMSWPPGKUDIOIKGSEQAUMMQFLKLTNXYIFQVCCYZXUEZCDMDDASEKNRWQYSEZYLXXKKXKLLSPEIGEXQAKBAHEJSRNUAOCAWBLWFAEWFAGOFHUTOPQAWCGUKNVGMQBWKWAOVIGJHQKXTMJHIGQYLXYHRUSEOQJHSRCMBIABUMXLLWN"
+    TEST_STR = TEST_STR[:60]
+    print(crack(TEST_STR, 20))
