@@ -22,8 +22,8 @@ def fib_np(n: int):
 
 def fib_recursion(n):
     """
-    低效率警告
-    这是一种极其懒散的写法，甚至你输入100它都会卡住!
+    低效率警告.
+    这是一种极其懒散的递归写法，甚至你输入100它都会卡住
     :param n:
     :return:
     """
@@ -31,7 +31,7 @@ def fib_recursion(n):
 
 
 def fib_tail_recursion(n):
-
+    pass
 
 if __name__ == "__main__":
-    print(fib_np(1000))
+    print(fib_recursion(100))
