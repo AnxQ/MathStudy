@@ -6,12 +6,12 @@ import xlwt
 initialList = [1, 5, 2, 6, 3, 7, 4, 8, 9, 13, 10, 14, 11, 15, 12, 16]
 
 rgv = RGV(position=0,
-          up_time_1=28,
-          up_time_2=31,
+          up_time_1=27,
+          up_time_2=32,
           wash_time=25,
-          move_time=[0, 20, 33, 46])
-cnc_raid: List[CNC] = [CNC(single_produce_time=560, identity=2 * i + 1, far=False, position=i, maintance=True) for i in range(0, 4)] + \
-                      [CNC(single_produce_time=560, identity=2 * i + 2, far=True, position=i, maintance=True) for i in range(0, 4)]
+          move_time=[0, 18, 32, 46])
+cnc_raid: List[CNC] = [CNC(single_produce_time=545, identity=2 * i + 1, far=False, position=i, maintance=True) for i in range(0, 4)] + \
+                      [CNC(single_produce_time=545, identity=2 * i + 2, far=True, position=i, maintance=True) for i in range(0, 4)]
 
 
 def simulate(initial_plan, output=False):
@@ -77,7 +77,7 @@ def simulate(initial_plan, output=False):
             sheet.write(i, 2, wp.error_tick)
             sheet.write(i, 3, wp.recovery_tick)
 
-        book.save('Condition3_TS_G1.xls')
+        book.save('Condition3_TS_G3.xls')
 
     return workpieces_fin.__len__()
 
@@ -88,7 +88,7 @@ def taboo_search():
     currentList = initialList
     initialBest = (initialList, simulate(initialList))
     BestList = [initialBest]
-    while taboo_loops < 6000:
+    while taboo_loops < 2000:
         # 取得临域空间
         swaplistList = []
         for i in range(0, len(currentList) - 1):
@@ -116,7 +116,7 @@ def taboo_search():
             BestList.append(currentBest)
         tabooList.append(currentBest[2])
         taboo_loops += 1
-    if taboo_loops >= 6000:
+    if taboo_loops >= 2000:
         print("Reached the looping limit.")
     return BestList
 

@@ -9,14 +9,14 @@ def simulate(cnc_type_ref, output=False):
     i = 1
     workpieces = []
     rgv = RGV(position=0,
-              up_time_1=27,
-              up_time_2=32,
+              up_time_1=28,
+              up_time_2=31,
               wash_time=25,
-              move_time=[0, 18, 32, 46])
+              move_time=[0, 20, 33, 46])
 
-    cnc_raid: List[CNC] = [CNC(step_1_produce_time=455, step_2_produce_time=182, identity=2 * i + 1,
+    cnc_raid: List[CNC] = [CNC(step_1_produce_time=400, step_2_produce_time=378, identity=2 * i + 1, maintance=True,
                                far=False, position=i) for i in range(0, 4)] + \
-                          [CNC(step_1_produce_time=455, step_2_produce_time=182, identity=2 * i + 2,
+                          [CNC(step_1_produce_time=400, step_2_produce_time=378, identity=2 * i + 2, maintance=True,
                                far=True, position=i) for i in range(0, 4)]
 
     for cnc_naked in cnc_raid:
@@ -32,11 +32,17 @@ def simulate(cnc_type_ref, output=False):
             possible_result.append((ca, cb))
 
     def evaluate_a(current_tick) -> CNC:
+        # idle_cnc_a = list(filter(lambda x: x.finish_tick <= current_tick, cnc_A))
+        # if len(idle_cnc_a):
+        #     return min(idle_cnc_a, key=lambda x: rgv.move_time[abs(x.position - rgv.position)])
         return min(cnc_A,
                    key=lambda x: max(rgv.move_time[abs(x.position - rgv.position)], x.finish_tick - current_tick) +
                                  (rgv.up_time_2 if x.far else rgv.up_time_1))
 
     def evaluate_b(current_tick) -> CNC:
+        # idle_cnc_b = list(filter(lambda x: x.finish_tick <= current_tick, cnc_B))
+        # if len(idle_cnc_b):
+        #     return min(idle_cnc_b, key=lambda x: rgv.move_time[abs(x.position - rgv.position)])
         return min(cnc_B,
                    key=lambda x: max(rgv.move_time[abs(x.position - rgv.position)], x.finish_tick - current_tick) +
                                  (rgv.up_time_2 if x.far else rgv.up_time_1))
@@ -69,7 +75,7 @@ def simulate(cnc_type_ref, output=False):
             sheet.write(i, 4, wp.mother_cnc_2.identity)
             sheet.write(i, 5, wp.up_tick_2)
             sheet.write(i, 6, wp.down_tick_2)
-        book.save('Condition2_VS_G1.xls')
+        book.save('Condition3_VS_G1.xls')
 
     return workpieces.__len__()
 

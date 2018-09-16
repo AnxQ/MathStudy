@@ -158,7 +158,7 @@ class RGV(MachineBase):
                 cnc.working_workpiece.down_tick = current_tick
                 current_tick = self.finish_tick
                 self.wash(cnc.working_workpiece, current_tick)
-
+            current_tick = self.finish_tick
             cnc.process(workpiece, current_tick)
 
         # 多步加工 A (下B料上A料)
@@ -166,7 +166,8 @@ class RGV(MachineBase):
             if not cnc.type == CNCType.A:
                 return None
             workpiece.up_tick_1 = current_tick
-            self.holding_workpiece = cnc.process(workpiece, current_tick)
+
+            self.holding_workpiece = cnc.process(workpiece, self.finish_tick)
             if self.holding_workpiece:
                 self.holding_workpiece.status = CNCType.B
                 self.holding_workpiece.down_tick_1 = current_tick
@@ -176,7 +177,8 @@ class RGV(MachineBase):
             if not cnc.type == CNCType.B:
                 return None
             workpiece.up_tick_2 = current_tick
-            self.holding_workpiece = cnc.process(workpiece, current_tick)
+
+            self.holding_workpiece = cnc.process(workpiece, self.finish_tick)
             # 换料后执行清洗
             if self.holding_workpiece:
                 self.holding_workpiece.down_tick_2 = current_tick
