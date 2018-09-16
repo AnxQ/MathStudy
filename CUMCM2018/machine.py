@@ -1,10 +1,18 @@
+"""
+各种机械、工件的类型定义，及动作执行的方法
+"""
 from enum import Enum
 import numpy as np
 
+# 调试模式开关
+# 设置为True以在模拟过程中提供详细记录
 debug_mode = False
 
 
 class Workpiece:
+    """
+    工件类
+    """
     def __init__(self, **kwargs):
         self.up_tick = 0
         self.down_tick = 0
@@ -31,11 +39,17 @@ class Workpiece:
 
 
 class MachineBase:
+    """
+    考虑到机械都存在完成时间，设置此基类
+    """
     def __init__(self):
         self.finish_tick = 0
 
 
 class CNCType(Enum):
+    """
+    用于CNC与零件状态匹配，以及废零件的标记
+    """
     Abandon = -1
     S = 0
     A = 1
@@ -43,6 +57,9 @@ class CNCType(Enum):
 
 
 class CNC(MachineBase):
+    """
+    CNC类
+    """
     def __init__(self, **kwargs):
         self.single_produce_time = 0
         self.step_1_produce_time = 0
@@ -109,6 +126,9 @@ class CNC(MachineBase):
 
 
 class RGV(MachineBase):
+    """
+    RGV类
+    """
     def __init__(self, **kwargs):
         self.wash_time = 0
         self.up_time_1 = 0
@@ -123,6 +143,10 @@ class RGV(MachineBase):
         return
 
     def reset(self):
+        """
+        重置CNC状态为初始情况
+        :return:
+        """
         self.position = 0
         self.holding_workpiece = None
         self.washing_workpiece = None
@@ -130,6 +154,12 @@ class RGV(MachineBase):
         pass
 
     def wash(self, workpiece: Workpiece, current_tick):
+        """
+        清洗当前零件
+        :param workpiece: 待清洗零件
+        :param current_tick: 当前时刻
+        :return: None
+        """
         if debug_mode:
             print(
                 f"{current_tick}: Wash WP {workpiece.identity}, Remove {self.washing_workpiece.identity if self.washing_workpiece else ''}")
@@ -138,6 +168,13 @@ class RGV(MachineBase):
         return
 
     def up(self, workpiece: Workpiece, cnc: CNC, current_tick):
+        """
+        上料方法
+        :param workpiece: rgv带来的生料或半成料
+        :param cnc: 待上料的CNC对象
+        :param current_tick: 当前时刻
+        :return: 上料的完成时刻
+        """
         # 若当前CNC尚未完成，则选择等待上料
         if cnc.finish_tick > current_tick:
             if debug_mode:
@@ -188,7 +225,12 @@ class RGV(MachineBase):
         return self.finish_tick
 
     def move(self, cnc: CNC, current_tick):
-        # 移动
+        """
+        RGV的移动方法
+        :param cnc: 所移动到达的CNC
+        :param current_tick: 当前时刻
+        :return: 移动完成的时刻
+        """
         if debug_mode:
             print(f"{current_tick}: Move to CNC {cnc.identity}")
         current_move_time = self.move_time[abs(self.position - cnc.position)]
