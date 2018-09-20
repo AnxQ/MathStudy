@@ -60,4 +60,4 @@ def fib_iterate(n: int):
 
 
 if __name__ == "__main__":
-    print(fib_np_2(1476))
+    print(fib_np(100))

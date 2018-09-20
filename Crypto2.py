@@ -1,10 +1,11 @@
 import numpy as np
 import xlrd
+import time
 
 ALPHABET_DICT: dict = dict(zip([chr(i) for i in range(65, 91)], [i % 26 for i in range(1, 27)]))
 NUMERIC_DICT: dict = dict(zip(ALPHABET_DICT.values(), ALPHABET_DICT.keys()))
 
-workbook = xlrd.open_workbook(r'./essential_words_cn.xls')
+workbook = xlrd.open_workbook(r'./essential_words_en.xls')
 word_sheet = workbook.sheet_by_index(1)
 NORMAL_WORD = list(map(lambda x: x.upper(), word_sheet.col_values(0)))
 NORMAL_WORD.sort(key=lambda x: len(x), reverse=True)
@@ -28,7 +29,7 @@ def inv_m26(m: np.matrix):
         if det_m * i % 26 == 1:
             inv_det_m = i
             break
-    return np.mod(inv_det_m * det_m * m.I, 26)
+    return np.mod(inv_det_m * np.matrix([[m[1, 1], m[1, 0]], [m[0, 1], m[0, 0]]]), 26)
 
 
 def encrypt(dcrypted_str: str, key_matrix: np.matrix):
@@ -59,13 +60,13 @@ def crack(ecrypted_str: str, max_hope: int):
                         continue
                     res = decrypt(test_str, key)
                     evaluate = judge(res)
-                    if res is not None and evaluate >= int(crack_treshold / 6):
-                        result.append([evaluate, key.reshape(1, -1), res])
+                    if res is not None and evaluate >= int(2):
+                        result.append([evaluate, key, res])
     result.sort(key=lambda x: x[0], reverse=True)
     return result
 
 
-def judge(string: str, lang="pinyin") -> int:
+def judge(string: str) -> int:
     current = 0
     while len(string) > 0:
         flag = True
@@ -83,6 +84,8 @@ def judge(string: str, lang="pinyin") -> int:
 
 if __name__ == '__main__':
     TEST_STR: str = "AOBZKNJUYSWCUQCDHSSYHISHVGABZPLIZFSVDMXMABKYNZTCOPYWNWEEQFSHMQBWKWMQPEOGUQUYMSWPPGKUDIOIKGSEQAUMMQFLKLTNXYIFQVCCYZXUEZCDMDDASEKNRWQYSEZYLXXKKXKLLSPEIGEXQAKBAHEJSRNUAOCAWBLWFAEWFAGOFHUTOPQAWCGUKNVGMQBWKWAOVIGJHQKXTMJHIGQYLXYHRUSEOQJHSRCMBIABUMXLLWN"
-    MY_KEY = np.matrix([[11, 8], [3, 7]])
-    res = crack(TEST_STR, 26)
+    start = time.time()
+    res = crack(TEST_STR[:60], 26)
+    end = time.time()
     print(res)
+    print(f"Process finished in: {end - start}s")

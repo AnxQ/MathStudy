@@ -1,4 +1,5 @@
 from typing import List
+import time
 
 normal_frequency = [4, 19, 14, 0, 13, 8, 17, 18, 7, 3, 11, 2, 20, 12, 15, 24, 22, 6, 1, 21, 10, 23, 9, 16, 25]
 normal_word = ["and", "is", "in", "at", "of", "by", "the", "not", "can", "are"]
@@ -43,16 +44,16 @@ def encrypt(dcrpted_str: str, key: List[int]):
 
 
 def crack(ecrpted_str: str):
-    prec = 4
+    threshhold = 4
 
     result = []
     origin_frequency = [[alphabet.index(c), ecrpted_str.count(c)] for c in alphabet]
     sorted_frequency = [kw[0] for kw in sorted(origin_frequency, key=lambda x: x[1], reverse=True)]
 
-    for a in sorted_frequency[0:int(len(sorted_frequency) / prec)]:
-        for b in normal_frequency[0:int(len(normal_frequency) / prec)]:
-            for c in normal_frequency[normal_frequency.index(b) + 1:int(len(normal_frequency) / prec)]:
-                for d in sorted_frequency[sorted_frequency.index(a) + 1:int(len(sorted_frequency) / prec)]:
+    for a in sorted_frequency[:threshhold]:
+        for b in normal_frequency[:threshhold]:
+            for c in normal_frequency[normal_frequency.index(b) + 1:threshhold]:
+                for d in sorted_frequency[sorted_frequency.index(a) + 1:threshhold]:
                     key = crack_key(a, b, c, d)
                     if key is not None:
                         predict_str = decrypt(ecrpted_str, key)
@@ -72,4 +73,7 @@ if __name__ == "__main__":
                          "fqatg gtahgtvtsa hs rp akpxdfsw, dkt kfd ctts gttvmypltw cl akt sp ats vhwwyt dzkppy xsahy spr. " \
                          "′vl chnntda mytfdxgt hd ap ct rhak vl daxwtsad fsw h rpxyw spa ytfut vl myfaqpgv fd ypsn fd h zfs dafsw xm′ dfhw akt wtupatw atfzktg. " \
                          "akt atfzktgd′ wfl hd ztytcgfatw hs zkhsf ps dtma atsak tutgl ltfg. "
+    start = time.time()
     print(crack(encrypted_str))
+    end = time.time()
+    print(f"Process finished in: {end - start}s")
